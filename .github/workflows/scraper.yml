@@ -1,0 +1,35 @@
+name: Scheduled Python Scraper
+
+on:
+  workflow_dispatch:
+  schedule:
+    # GitHub Actions usa UTC. 13:00 UTC = 08:00 en Colombia.
+    - cron: "0 13 * * *"
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run scraper
+        env:
+          SCRAPER_URL: https://books.toscrape.com/
+        run: python scraper.py
+
+      - name: Upload scraping results
+        uses: actions/upload-artifact@v4
+        with:
+          name: scraping-results
+          path: data/
+          if-no-files-found: error
